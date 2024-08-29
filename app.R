@@ -27,7 +27,7 @@ choices <-
   )
 
 ui <- page_fluid(
-  markdown("## Identify outliers in air quality data"),
+  markdown("Identify suspicious values in air quality data"),
   layout_column_wrap(
     card(
       card_header("Click on an outlier to highlight the point in the table."),
