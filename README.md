@@ -1,1 +1,1 @@
-# shiny-database
+# Outlier identification app
