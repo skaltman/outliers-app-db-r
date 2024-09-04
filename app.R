@@ -9,7 +9,6 @@ library(dplyr)
 
 source("R/plot.R")
 source("R/table.R")
-source("R/data.R")
 
 initialize_database <- function(con, source_db, table) {
   source_con <- dbConnect(duckdb::duckdb(), dbdir = source_db)
@@ -27,10 +26,12 @@ choices <-
   )
 
 ui <- page_fluid(
-  markdown("Identify suspicious values in air quality data"),
+  markdown("## Identify suspicious values in air quality data"),
   layout_column_wrap(
     card(
-      card_header("Click on an outlier to highlight the point in the table."),
+      card_header(
+        markdown("Click on a <span style='color:#6ea0ff;'>suspicious value</span> to highlight the point in the table.")
+      ),
       layout_column_wrap(
         selectInput(
           "plot_x",
