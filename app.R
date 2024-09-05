@@ -7,6 +7,7 @@ library(plotly)
 library(plu)
 library(dplyr)
 
+source("R/data.R")
 source("R/plot.R")
 source("R/table.R")
 
