@@ -1,1 +1,1 @@
-# Outlier identification app
+# Outlier identification Shiny app, in R
