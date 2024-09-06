@@ -1,0 +1,6 @@
+.custom-card-header {
+  background-color: #d4edda;  /* Light green background */
+  font-size: 1.25rem;         /* Slightly larger font size */
+  font-weight: bold;          /* Optional: Make the text bold */
+  padding: 10px;
+}
