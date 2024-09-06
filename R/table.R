@@ -15,7 +15,8 @@ create_editable_table <- function(data) {
         searching = FALSE,
         lengthChange = FALSE,
         info = FALSE,
-        paging = FALSE
+        paging = FALSE,
+        ordering = FALSE
        # scrollY = "400px"
       ),
     editable = list(target = "cell", disable = list(columns = c(0:3))),
