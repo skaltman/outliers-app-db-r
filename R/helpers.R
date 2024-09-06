@@ -6,6 +6,17 @@ initialize_database <- function(con, source_db, table) {
   dbWriteTable(con, table, ozone)
 }
 
+create_card <- function(header_text, ...) {
+  card(
+    card_header(
+      markdown(
+        glue::glue("{bsicons::bs_icon('info-circle')} {header_text}")),
+      class = "bg-light"
+    ),
+    ...
+  )
+}
+
 create_outliers <- function(data) {
   iqr_bound <- 1.5 * IQR(data$ppm)
   q1 <- quantile(data$ppm, 0.25)

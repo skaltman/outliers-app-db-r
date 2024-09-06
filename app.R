@@ -7,16 +7,8 @@ library(plotly)
 library(plu)
 library(dplyr)
 
-source("R/plot.R")
-source("R/table.R")
-
-initialize_database <- function(con, source_db, table) {
-  source_con <- dbConnect(duckdb::duckdb(), dbdir = source_db)
-  ozone <- dbReadTable(source_con, table)
-  dbDisconnect(source_con)
-
-  dbWriteTable(con, table, ozone)
-}
+source("R/helpers.R")
+includeCSS("www/styles.css")
 
 choices <-
   c(
@@ -28,10 +20,8 @@ choices <-
 ui <- page_fluid(
   markdown("## Identify suspicious values in air quality data"),
   layout_column_wrap(
-    card(
-      card_header(
-        markdown("Click on a <span style='color:#6ea0ff;'>suspicious value</span> to highlight the point in the table.")
-      ),
+    create_card(
+      "Click on a suspicious value (in blue) to highlight the point in the table.",
       layout_column_wrap(
         selectInput(
           "plot_x",
@@ -44,17 +34,28 @@ ui <- page_fluid(
           choices = choices[choices != "date_local"]
         )
       ),
-      plotlyOutput("plot"),
-      full_screen = TRUE
+      plotlyOutput("plot")
     ),
-    card(
-      card_header(
+    layout_column_wrap(
+      width = 1,
+      create_card(
+        "Change `Flag` to `1` to flag a value as an error. Flagged points will appear red in the plot.",
+        DTOutput("table"),
+        actionButton("write_data", "Write to database", width = "50%")
+      ),
+      card(
+        card_header("About this app", class = "bg-light"),
         markdown(
-          "Change `Flag` to `1` to flag a value as an error. Flagged points will appear red in the plot."
+          "This app uses ozone data from the [EPA](https://www.epa.gov/outdoor-air-quality-data).
+          The values shown in blue represent rows where `PPM` (ozone level in parts-per-million) was an outlier, identified using the [IQR method](https://en.wikipedia.org/wiki/Interquartile_range#Outliers).
+          Some of these values are real, but some are errors, created for the purposes of this app. \n
+
+          The app reads from and writes to an in-memory DuckDB database.
+          When you refresh the page, the database will be regenerated from scratch, so you will not see your changes.
+          "
         )
       ),
-      DTOutput("table"),
-      actionButton("write_data", "Write to database", width = "50%")
+      heights_equal = "row"
     )
   )
 )
@@ -83,7 +84,6 @@ server <- function(input, output, session) {
     input$table_cell_edit,
     {
       edited_cell <- input$table_cell_edit
-      # edited <- table_data()
       new_plot_data <- plot_data()
 
       new_flag_value <- as.integer(edited_cell$value)
@@ -97,7 +97,6 @@ server <- function(input, output, session) {
       else {
         new_plot_data[edited_cell$row, "flag"] <- new_flag_value
         plot_data(new_plot_data)
-        #table_data(edited) # Update with new data
       }
     }
   )
@@ -105,7 +104,9 @@ server <- function(input, output, session) {
   # Plot data
   output$plot <-
     renderPlotly({
-      plot_ozone(input, ozone, plot_data(), plotly_event = "plotly_click")
+      plot_ozone(
+        input, ozone, plot_data(), plotly_event = "plotly_click", choices
+      )
     })
 
   # Editable datatable
@@ -160,14 +161,16 @@ server <- function(input, output, session) {
 
           n_changes <- nrow(rows_changed)
 
-          showNotification(
-            markdown(
-              glue::glue(
-                "{n_changes} `Flag` {plu::ral('value', n_changes[n_changes == 1])} successfully updated in database."
-              )
-            ),
-            type = "message"
-          )
+          if (n_changes > 0) {
+            showNotification(
+              markdown(
+                glue::glue(
+                  "{n_changes} `Flag` {plu::ral('value', n_changes[n_changes == 1])} successfully updated in database."
+                )
+              ),
+              type = "message"
+            )
+          }
 
           dbCommit(con)
         },
