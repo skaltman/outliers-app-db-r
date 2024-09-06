@@ -6,8 +6,11 @@ choices <-
   )
 
 plot_ozone <- function(input, ozone, outliers, plotly_event) {
+  x <- sym(input$plot_x)
+  y <- sym(input$plot_y)
+
   p <-
-    ggplot(mapping = aes_string(input$plot_x, input$plot_y)) +
+    ggplot(mapping = aes(!!x, !!y)) +
     geom_point(
       data =
         ozone |>
