@@ -18,9 +18,9 @@ create_card <- function(header_text, ...) {
 }
 
 create_outliers <- function(data) {
-  iqr_bound <- 1.5 * IQR(data$ppm)
-  q1 <- quantile(data$ppm, 0.25)
-  q3 <- quantile(data$ppm, 0.75)
+  iqr_bound <- 1.5 * IQR(data |> pull(ppm))
+  q1 <- quantile(data |> pull(ppm), 0.25)
+  q3 <- quantile(data |> pull(ppm), 0.75)
 
   data |>
     filter(

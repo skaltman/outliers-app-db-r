@@ -69,10 +69,11 @@ server <- function(input, output, session) {
 
   ozone <-
     dplyr::tbl(con, "ozone") |>
-    collect() |>
     rename(ppm = arithmetic_mean)
 
-  outliers <- create_outliers(ozone)
+  outliers <-
+    create_outliers(ozone) |>
+    collect()
 
   selectedRow <- reactiveVal(NULL)
 
@@ -102,11 +103,14 @@ server <- function(input, output, session) {
     }
   )
 
+  # Collect ozone table to prepare for plotting
+  ozone_df <- collect(ozone)
+
   # Plot data
   output$plot <-
     renderPlotly({
       plot_ozone(
-        input, ozone, plot_data(), plotly_event = "plotly_click", choices
+        input, ozone_df, plot_data(), plotly_event = "plotly_click", choices
       )
     })
 
