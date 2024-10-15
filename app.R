@@ -6,6 +6,7 @@ library(DT)
 library(plotly)
 library(plu)
 library(dplyr)
+library(purrr)
 
 source("R/helpers.R")
 includeCSS("www/styles.css")
@@ -151,13 +152,16 @@ server <- function(input, output, session) {
             select(id, flag_new)
 
 
-          for (id in rows_changed$id) {
-            dbExecute(
-              con,
-              "UPDATE ozone SET flag = ? WHERE id = ?",
-              params = list(rows_changed$flag_new[rows_changed$id == id], id)
-            )
-          }
+          walk2(
+            rows_changed$flag_new,
+            rows_changed$id,
+            \(x, y)
+              dbExecute(
+                con,
+                "UPDATE ozone SET flag = ? WHERE id = ?",
+                params = list(x, y)
+              )
+          )
 
           n_changes <- nrow(rows_changed)
 
@@ -175,6 +179,7 @@ server <- function(input, output, session) {
           dbCommit(con)
         },
         error = function(e) {
+          print(e)
           dbRollback(con)
           showNotification("Error: Failed to update database.", type = "error")
         }
