@@ -162,8 +162,7 @@ server <- function(input, output, session) {
             \(x, y)
               dbExecute(
                 con,
-                "UPDATE ozone SET flag = ? WHERE id = ?",
-                params = list(x, y)
+                glue::glue("UPDATE ozone SET flag = {x} WHERE id = {y}")
               )
           )
 
